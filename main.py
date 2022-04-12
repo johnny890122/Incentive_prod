@@ -29,7 +29,7 @@ warnings.filterwarnings('ignore')
     (5) team_prod_dict: 每個工作種類(key)所屬的控場(value)種類，於計算team lead iph時會用到
 '''
 
-month = "2022-02"
+month = "2022-03"
 
 month_first_day = datetime.datetime.strptime(month, "%Y-%m")
 month_num = str(month_first_day.month)  # 得到str月份
@@ -182,7 +182,7 @@ def read_punch_file(path, revise_station_name, type_dic):
     '''
     讀入站點打卡_for-attendance資料，進行整理
     ----------------
-    Input: 
+    Input:
     1. path: 站點打卡路徑(punch_file_name)
     2. revise_station_name: 要將站點進行參照的表格
     2. type_dic: 字典，用於將站點打卡的中文站點轉換為英文
@@ -221,8 +221,10 @@ def read_human_data():
     3. pda_name_dic: PDA帳號(key)與姓名(value)
     4. pda_id_dic: PDA帳號(key)與員編(value)
     '''
-    human_df = pd.DataFrame(get_gdoc.get_google_sheet(*ppl_schema.trans()))[[0, 1, 2, 3]]  # 只取前四欄
+    # human_df = pd.DataFrame(get_gdoc.get_google_sheet(*ppl_schema.trans()))[[0, 1, 2, 3]]  # 只取前四欄
+    human_df = pd.read_csv("tmp_input/人力資料 schema - 通訊錄.csv", usecols=["WMS帳號", "公司", "PDA帳號", "worker_name"])
     human_df.columns = ['員編', '公司', 'PDA帳號', 'worker_name']
+
     human_df = human_df[1:]  # 去掉第一行表頭
     id_name_dic = {str(x).lower(): y for x, y in zip(human_df['員編'], human_df['worker_name'])}
     name_id_dic = {}
@@ -243,7 +245,8 @@ def add_data_in_inb():
     output: 更新inb_pics_file_path
     '''
     # 3-1 抓Google Sheet「人力資料schema」，存為ppl_schema_df(DataFrame)
-    ppl_schema_df = pd.DataFrame(get_gdoc.get_google_sheet(*ppl_schema.trans()))[[0, 2]]  # 只選員編與貼標ID
+    # ppl_schema_df = pd.DataFrame(get_gdoc.get_google_sheet(*ppl_schema.trans()))[[0, 2]]  # 只選員編與貼標ID
+    ppl_schema_df = pd.read_csv("tmp_input/人力資料 schema - 通訊錄.csv", usecols=["WMS帳號", "PDA帳號"])
     ppl_schema_df = ppl_schema_df[1:]  # 去掉第一行表頭
     ppl_schema_df.columns = ['員編', '貼標ID']
     time3_1 = time.time()
@@ -277,12 +280,13 @@ def add_data_in_inb():
 
     # 3-3 抓取新增收發，並匯出excel，並存為docked_summary
     docked_path = 'docked_raw_{}.xlsx'.format(month_shortname)
-    docked_df = pd.DataFrame(get_gdoc.get_google_sheet(*docked_gdoc.trans()))
+    # docked_df = pd.DataFrame(get_gdoc.get_google_sheet(*docked_gdoc.trans()))
+    docked_df = pd.read_csv("tmp_input/Incentive收發 - Sheet1.csv")
     docked_df.to_excel(docked_path, index=False)
 
     docked_df.columns = ['員編', 'INbound ID', '國碼', '是否拒收', '狀態', '備註', 'Cancel後新單', 'QTY', '收發時間', 'DATE', 'HOUR']
-    docked_df['Month'] = pd.to_datetime(docked_df['DATE'], errors='coerce').dt.month.astype(str)
-    docked_df = docked_df[docked_df['Month'] == month_num]
+    docked_df['Month'] = pd.to_datetime(docked_df['DATE'], errors='coerce').dt.month.astype(float)
+    docked_df = docked_df[docked_df['Month'] == int(month_num)]
     docked_df['員編'] = docked_df['員編'].astype('str')
     docked_df['員編'] = docked_df['員編'].apply(lambda x: 'remove_' if len(x) != 5 else x)
     docked_df = docked_df[docked_df['員編'] != 'remove_']
@@ -305,6 +309,7 @@ def add_data_in_inb():
     # 檔案4. print_summary: 如果有檔案，直接讀取過去檔案；反之則執行processing.take_month_data取得資料
     print_month_path = 'print_raw_{}.xlsx'.format(month_shortname)
     print_df = get_gdoc.get_print_data(month_first_day, print_month_path, *print_gdoc.trans())
+
     print_df = print_df[["印標人員", "DATE"]]
     print_df['印標人員'] = print_df['印標人員'].astype('str')
 
@@ -404,6 +409,7 @@ def get_whole_df(ib_df, inv_df, ob_df):
     '''
     whole_df = pd.concat([ib_df, inv_df, ob_df])
     whole_df['create_time'] = pd.to_datetime(whole_df['create_time'], errors='coerce')  # 轉不了日期就跳過
+
     whole_df.dropna(how='any', inplace=True)
     whole_df = whole_df[whole_df['create_time'].dt.date != datetime.date(1899, 12, 30)]
     whole_df.sort_values(['create_time'], inplace=True)
@@ -461,9 +467,10 @@ if __name__ == '__main__':
     print('Checkpoint 4 whole_df SUCCEED             Spend {:.2f} seconds'.format(time4 - time3))
 
     merge_df = calculate_score.get_merge_df(whole_df, punch_df)
+    merge_df.to_csv("merge_df.csv", index=False, encoding="utf_8_sig")
+
     time5_1 = time.time()
     print('Checkpoint 5-1 get_merge_df SUCCEED       Spend {:.2f} seconds'.format(time5_1 - time4))
-
     calculate_score.get_valid_csv(merge_df, cat_name_checked)
     time5_2 = time.time()
     print('Checkpoint 5-2 get_valid_csv SUCCEED      Spend {:.2f} seconds'.format(time5_2 - time5_1))
@@ -478,8 +485,6 @@ if __name__ == '__main__':
     calculate_score.get_prod_TL_score(productivity_varable, team_prod_dict, whole_df, punch_df, tl_output_path)
     time7 = time.time()
     print('Checkpoint 7 productivity_TL SUCCEED      Spend {:.2f} seconds'.format(time7 - time6))
-
-    # merge_df = pd.read_csv("merge_df.csv")
 
     valid_whole_df = calculate_score.get_valid_whole_df(merge_df)
     valid_whole_df.dropna(axis=0, inplace=True)

@@ -56,16 +56,17 @@ def get_valid_whole_df(merge_df):
     '''
     將5-1的 merge_df 按照以下規則進行篩選：
     1. 打卡時間位於 punch starting time and punch ending time
-    2. RT_picking 和 picking 為 1. 之例外 
+    2. RT_picking 和 Picking 為 1. 之例外 
     '''
 
     merge_df["keep"] = merge_df["valid_type"]
+
     for index, row in merge_df.iterrows():
-        if row["type"] == "Picking" and row["merge_type"] == "RT_picking":
+        if row["type"] == "Putaway" and row["merge_type"] == "RT_putaway":
             merge_df.iloc[index]["keep"] = True
-        elif row["type"] == "RT_picking" and row["merge_type"] == "Picking":
+        elif row["type"] == "RT_putaway" and row["merge_type"] == "Putaway":
             merge_df.iloc[index]["keep"] = True
-    
+
     valid_whole_df = merge_df.copy()
     valid_whole_df = valid_whole_df[valid_whole_df["keep"]]
     valid_whole_df = valid_whole_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders', 'total_pcs']]
