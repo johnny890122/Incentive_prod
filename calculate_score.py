@@ -63,9 +63,9 @@ def get_valid_whole_df(merge_df):
 
     for index, row in merge_df.iterrows():
         if row["type"] == "Putaway" and row["merge_type"] == "RT_putaway":
-            merge_df.iloc[index]["keep"] = True
+            merge_df.loc[index, "keep"] = True
         elif row["type"] == "RT_putaway" and row["merge_type"] == "Putaway":
-            merge_df.iloc[index]["keep"] = True
+            merge_df.loc[index, "keep"] = True
 
     valid_whole_df = merge_df.copy()
     valid_whole_df = valid_whole_df[valid_whole_df["keep"]]

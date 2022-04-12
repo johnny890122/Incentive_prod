@@ -467,10 +467,10 @@ if __name__ == '__main__':
     print('Checkpoint 4 whole_df SUCCEED             Spend {:.2f} seconds'.format(time4 - time3))
 
     merge_df = calculate_score.get_merge_df(whole_df, punch_df)
-    merge_df.to_csv("merge_df.csv", index=False, encoding="utf_8_sig")
-
+    # merge_df.to_csv("merge_df.csv", index=False, encoding="utf_8_sig")
     time5_1 = time.time()
     print('Checkpoint 5-1 get_merge_df SUCCEED       Spend {:.2f} seconds'.format(time5_1 - time4))
+    
     calculate_score.get_valid_csv(merge_df, cat_name_checked)
     time5_2 = time.time()
     print('Checkpoint 5-2 get_valid_csv SUCCEED      Spend {:.2f} seconds'.format(time5_2 - time5_1))
@@ -487,6 +487,7 @@ if __name__ == '__main__':
     print('Checkpoint 7 productivity_TL SUCCEED      Spend {:.2f} seconds'.format(time7 - time6))
 
     valid_whole_df = calculate_score.get_valid_whole_df(merge_df)
+
     valid_whole_df.dropna(axis=0, inplace=True)
     time8 = time.time()
     print('Checkpoint 8 get_valid_whole_df SUCCEED      Spend {:.2f} seconds'.format(time8 - time7))
