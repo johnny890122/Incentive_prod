@@ -1,0 +1,4 @@
+﻿,name,operator,type,create_time,pcs,box,orders,total_pcs,Check Result,created_time,end_time,print_label
+10219,潘怡安,sp99055,Cyclecount,2022-03-19 09:06:59,1,0,0,1,Wrong Station,2022-03-19 07:10:54,2022-03-19 10:53:31,ABNORMAL
+35260,潘怡安,sp99055,Cyclecount,2022-03-19 15:47:55,0,0,0,0,Wrong Station,2022-03-19 12:10:13,2022-03-19 16:04:37,ABNORMAL
+35273,潘怡安,sp99055,Cyclecount,2022-03-19 15:48:02,0,0,0,0,Wrong Station,2022-03-19 12:10:13,2022-03-19 16:04:37,ABNORMAL
