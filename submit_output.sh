@@ -3,4 +3,4 @@
 git status
 git add -A
 git commit -m 'dayily update'
-git push
+git push -f
