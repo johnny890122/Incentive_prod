@@ -4,3 +4,4 @@
 git status
 git add -A
 git commit -m 'Daily update'
+git push
