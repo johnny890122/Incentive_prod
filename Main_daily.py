@@ -891,8 +891,11 @@ def tmp_output_folder():
 
 
 if __name__ == '__main__':
-    
+    first_time = True
     while True:
+        if first_time:
+            time.sleep(52200)
+            first_time = False
         yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
         day = yesterday.strftime("%Y-%m-%d")
         month = yesterday.strftime("%Y-%m")
@@ -920,18 +923,6 @@ if __name__ == '__main__':
         print("="*20+"\n")
         
         time.sleep(60*60*24)
-
-
-# In[112]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
 
 # In[ ]:
