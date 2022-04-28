@@ -881,7 +881,7 @@ def tmp_output_folder():
 
 if __name__ == '__main__':
     
-    yesterday = datetime.datetime.now() - datetime.timedelta(days=2)
+    yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
     day = yesterday.strftime("%Y-%m-%d")
     month = yesterday.strftime("%Y-%m")
     
