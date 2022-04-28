@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[113]:
 
 
 import time
@@ -13,6 +13,7 @@ import warnings
 from google.oauth2.service_account import Credentials
 import gspread
 warnings.filterwarnings('ignore')
+import subprocess
 
 
 # In[2]:
@@ -702,6 +703,15 @@ def submit_score_to_gsheet(df):
     
     score_gsheet.update([score_df.columns.values.tolist()] + score_df.values.tolist())
 
+def movefileAndPush():
+    try:
+#         subprocess.run(['git','config','--global','user.email','test@gmail.com'])
+        subprocess.run(['git','add','-A'])
+        subprocess.run(['git','commit','-m','Daily update'])
+        subprocess.run(['git','push'])
+    except Exception as e:
+        print("Error occured :".format(e))
+
 
 # In[101]:
 
@@ -831,6 +841,7 @@ def main(day):
     print('Checkpoint 10 productivity_valid_TL SUCCEED        Spend {:.2f} seconds'.format(time10 - time9))
     
     submit_score_to_gsheet(scroe_df)
+    movefileAndPush()
     time11 = time.time()
     print('Checkpoint 11 Update final score to gsheet        Spend {:.2f} seconds'.format(time11 - time10))
     print('計算完成 共花費{:.2f}秒'.format(time11 - time0))
@@ -881,34 +892,37 @@ def tmp_output_folder():
 
 if __name__ == '__main__':
     
-    yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
-    day = yesterday.strftime("%Y-%m-%d")
-    month = yesterday.strftime("%Y-%m")
-    
-    month_first_day = datetime.datetime.strptime(month, "%Y-%m")
-    month_num = str(month_first_day.month)  # 得到str月份
-    month_shortname = month_first_day.strftime("%b")  # e.g. Jul, Jun
-    month_fullname = month_first_day.strftime("%B")  # e.g. July, June
+    while True:
+        yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+        day = yesterday.strftime("%Y-%m-%d")
+        month = yesterday.strftime("%Y-%m")
 
-    # Input Files
-    revise_station_name = 'Input/revise_station.xlsx'
-    inb_pics_file_path_new = 'Input/IB_production_new/IB_production_{}_new.xlsx'.format(day)  # IB_production增加印標、收發、貼標後會儲存在此，並做為之後計算的input
+        month_first_day = datetime.datetime.strptime(month, "%Y-%m")
+        month_num = str(month_first_day.month)  # 得到str月份
+        month_shortname = month_first_day.strftime("%b")  # e.g. Jul, Jun
+        month_fullname = month_first_day.strftime("%B")  # e.g. July, June
 
-    # Crate folder
-    output_foler(month_fullname)
-    tmp_output_folder()
+        # Input Files
+        revise_station_name = 'Input/revise_station.xlsx'
+        inb_pics_file_path_new = 'Input/IB_production_new/IB_production_{}_new.xlsx'.format(day)  # IB_production增加印標、收發、貼標後會儲存在此，並做為之後計算的input
 
-    tl_output_path = "Output/{}/productivity_TL/productivity_TL_{}.xlsx".format(month_fullname, day)
-    agent_output_path = "Output/{}/productivity_agent/productivity_agent_{}.xlsx".format(month_fullname, day)
-    tl_valid_output_path = "Output/{}/productivity_TL_valid/productivity_TL_{}_valid.xlsx".format(month_fullname, day)
-    agent_valid_output_path = "Output/{}/productivity_agent_valid/productivity_agent_{}_valid.xlsx".format(month_fullname, day)
+        # Crate folder
+        output_foler(month_fullname)
+        tmp_output_folder()
 
-    print("="*5 + "Caculate {} Incentive".format(day) + "="*5)
-    main(day)
-    print("="*20+"\n")
+        tl_output_path = "Output/{}/productivity_TL/productivity_TL_{}.xlsx".format(month_fullname, day)
+        agent_output_path = "Output/{}/productivity_agent/productivity_agent_{}.xlsx".format(month_fullname, day)
+        tl_valid_output_path = "Output/{}/productivity_TL_valid/productivity_TL_{}_valid.xlsx".format(month_fullname, day)
+        agent_valid_output_path = "Output/{}/productivity_agent_valid/productivity_agent_{}_valid.xlsx".format(month_fullname, day)
+
+        print("="*5 + "Caculate {} Incentive".format(day) + "="*5)
+        main(day)
+        print("="*20+"\n")
+        
+        time.sleep(60*60*24)
 
 
-# In[ ]:
+# In[112]:
 
 
 
