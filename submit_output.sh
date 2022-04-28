@@ -1,4 +1,4 @@
+python Main_daily.py
 git status
 git add -A
-git commit -m 'Upload output'
-git push
+git commit -m 'dayily update'
