@@ -894,9 +894,10 @@ if __name__ == '__main__':
     first_time = True
     while True:
         if first_time:
-            time.sleep(52200)
+            time.sleep(51300)
             first_time = False
         yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+        
         day = yesterday.strftime("%Y-%m-%d")
         month = yesterday.strftime("%Y-%m")
 
