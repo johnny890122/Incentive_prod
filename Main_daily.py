@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[113]:
+# In[1]:
 
 
 import time
@@ -172,7 +172,7 @@ creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
 gs = gspread.authorize(creds)
 
 
-# In[88]:
+# In[6]:
 
 
 # Checkpoint 1: 匯入打卡資料並進行前處理
@@ -213,7 +213,7 @@ def read_punch_file(day, revise_station_name, type_dic):
     return punch_raw_df
 
 
-# In[89]:
+# In[7]:
 
 
 # Checkpoint 2: 匯入人力資料並進行前處理
@@ -240,7 +240,7 @@ def read_human_data():
     return name_id_dic, id_name_dic, pda_name_dic, pda_id_dic
 
 
-# In[90]:
+# In[8]:
 
 
 # Checkpoint 3: 將IB_production新增貼標、收發、印標資料
@@ -352,7 +352,7 @@ def add_data_in_inb(time2):
     
 
 
-# In[91]:
+# In[9]:
 
 
 # Checkpoint 4: 輸入資料格式統一
@@ -375,7 +375,7 @@ def read_ibs(inb_pics_file_path_new, id_name_dic):
     return inb_pic_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders']]
 
 
-# In[92]:
+# In[10]:
 
 
 # Checkpoint 4-2: OB_production
@@ -414,7 +414,7 @@ def read_obs(id_name_dic, pda_id_dic):
     return ob_pic_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders']]
 
 
-# In[93]:
+# In[11]:
 
 
 # Checkpoint 4-3: INV_production
@@ -447,7 +447,7 @@ def read_inv(id_name_dic):
     return inv_pic_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders']]
 
 
-# In[94]:
+# In[12]:
 
 
 # Checkpoint 4-4: 將IB_production、OB_production、INV_production資料合併，得到whole_df
@@ -471,7 +471,7 @@ def get_whole_df(ib_df, inv_df, ob_df):
     return whole_df
 
 
-# In[95]:
+# In[13]:
 
 
 # Checkpoint 5-1: 將whole_df、punch_df合併，得到merge_df
@@ -510,7 +510,7 @@ def get_merge_df(whole_df, punch_df):
     return merge_df
 
 
-# In[96]:
+# In[14]:
 
 
 # Checkpoint 5-2: 將merge_df依各種工作種類合併(位於calculate_score.py)
@@ -530,7 +530,7 @@ def get_valid_csv(merge_df, cat_name_checked):
         cat_df.to_csv('Output/incentive_checked/{}/{}.csv'.format(day, cat), encoding="utf_8_sig")
 
 
-# In[97]:
+# In[15]:
 
 
 # Checkpoint 6: 計算productivity_agent
@@ -604,7 +604,7 @@ def get_prod_agent_score(cat_name, productivity_varable, whole_df, punch_df, age
     return productivity_table
 
 
-# In[98]:
+# In[16]:
 
 
 # Checkpoint 7: 計算productivity_TL
@@ -662,7 +662,7 @@ def get_prod_TL_score(productivity_varable, team_prod_dict, whole_df, punch_df, 
         productivity_team_function.to_excel(writer, sheet_name='productivity_team_function', index=False, encoding="utf_8_sig")
 
 
-# In[99]:
+# In[17]:
 
 
 # Checkpoint 8: 將merge_df進行validation，產出 valid_whole_df
@@ -689,7 +689,7 @@ def get_valid_whole_df(merge_df):
     return valid_whole_df
 
 
-# In[100]:
+# In[18]:
 
 
 def submit_score_to_gsheet(df):
@@ -713,7 +713,7 @@ def movefileAndPush():
         print("Error occured :".format(e))
 
 
-# In[101]:
+# In[19]:
 
 
 def get_everyday_tag_data(day):
@@ -735,7 +735,7 @@ def get_everyday_tag_data(day):
     return tag_df
 
 
-# In[102]:
+# In[20]:
 
 
 def get_everyday_print_data(day):
@@ -766,7 +766,7 @@ def get_everyday_print_data(day):
     return print_df
 
 
-# In[103]:
+# In[21]:
 
 
 def main(day):
@@ -847,7 +847,7 @@ def main(day):
     print('計算完成 共花費{:.2f}秒'.format(time11 - time0))
 
 
-# In[104]:
+# In[22]:
 
 
 def output_foler(month_fullname):
@@ -887,15 +887,12 @@ def tmp_output_folder():
         os.makedirs("tmp_output/whole_df/")
 
 
-# In[107]:
+# In[ ]:
 
 
 if __name__ == '__main__':
     first_time = True
     while True:
-        if first_time:
-            time.sleep(51300)
-            first_time = False
         yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
         
         day = yesterday.strftime("%Y-%m-%d")
