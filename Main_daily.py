@@ -165,14 +165,6 @@ Score_gdoc.SCOPES = "https://docs.google.com/spreadsheets/d/15BGIJYsV7onztRgBoji
 Score_gdoc.SAMPLE_RANGE_NAME = "Daily Update"
 
 
-# In[5]:
-
-
-scope = ['https://www.googleapis.com/auth/spreadsheets']
-creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
-gs = gspread.authorize(creds)
-
-
 # In[6]:
 
 
@@ -771,6 +763,12 @@ def get_everyday_print_data(day):
 
 
 def main(day):
+    
+    # 獲得憑證
+    scope = ['https://www.googleapis.com/auth/spreadsheets']
+    creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
+    gs = gspread.authorize(creds)
+
     print("="*5 + "Caculate {} Incentive".format(day) + "="*5)
     time0 = time.time()
     punch_df = read_punch_file(day, revise_station_name, type_dic)
