@@ -918,7 +918,7 @@ agent_valid_output_path = "Output/{}/productivity_agent_valid/productivity_agent
 
 
 if __name__ == "__main__":
-    schedule.every().day.at("06:15").do(main, day)
+    schedule.every().day.at("22:15").do(main, day)
     while True:
         schedule.run_pending()
         time.sleep(60) # wait one minute
