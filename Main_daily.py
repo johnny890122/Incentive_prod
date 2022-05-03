@@ -14,6 +14,7 @@ from google.oauth2.service_account import Credentials
 import gspread
 warnings.filterwarnings('ignore')
 import subprocess
+import schedule
 
 
 # In[2]:
@@ -770,6 +771,7 @@ def get_everyday_print_data(day):
 
 
 def main(day):
+    print("="*5 + "Caculate {} Incentive".format(day) + "="*5)
     time0 = time.time()
     punch_df = read_punch_file(day, revise_station_name, type_dic)
     punch_df.to_csv('tmp_output/punch_df/punch_df_{}.csv'.format(day), index=False, encoding="utf_8_sig")
@@ -845,6 +847,7 @@ def main(day):
     time11 = time.time()
     print('Checkpoint 11 Update final score to gsheet        Spend {:.2f} seconds'.format(time11 - time10))
     print('計算完成 共花費{:.2f}秒'.format(time11 - time0))
+    print("="*20+"\n")
 
 
 # In[22]:
@@ -887,40 +890,46 @@ def tmp_output_folder():
         os.makedirs("tmp_output/whole_df/")
 
 
+# In[29]:
+
+
+yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+day = yesterday.strftime("%Y-%m-%d")
+month = yesterday.strftime("%Y-%m")
+
+month_first_day = datetime.datetime.strptime(month, "%Y-%m")
+month_num = str(month_first_day.month)  # 得到str月份
+month_shortname = month_first_day.strftime("%b")  # e.g. Jul, Jun
+month_fullname = month_first_day.strftime("%B")  # e.g. July, June
+
+# Input Files
+revise_station_name = 'Input/revise_station.xlsx'
+inb_pics_file_path_new = 'Input/IB_production_new/IB_production_{}_new.xlsx'.format(day)  # IB_production增加印標、收發、貼標後會儲存在此，並做為之後計算的input
+
+# Crate folder
+output_foler(month_fullname)
+tmp_output_folder()
+
+tl_output_path = "Output/{}/productivity_TL/productivity_TL_{}.xlsx".format(month_fullname, day)
+agent_output_path = "Output/{}/productivity_agent/productivity_agent_{}.xlsx".format(month_fullname, day)
+tl_valid_output_path = "Output/{}/productivity_TL_valid/productivity_TL_{}_valid.xlsx".format(month_fullname, day)
+agent_valid_output_path = "Output/{}/productivity_agent_valid/productivity_agent_{}_valid.xlsx".format(month_fullname, day)
+
+
+# In[31]:
+
+
+if __name__ == "__main__":
+    schedule.every().day.at("06:15").do(main, day)
+    while True:
+        schedule.run_pending()
+        time.sleep(60) # wait one minute
+
+
 # In[ ]:
 
 
-if __name__ == '__main__':
-    first_time = True
-    while True:
-        yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
-        
-        day = yesterday.strftime("%Y-%m-%d")
-        month = yesterday.strftime("%Y-%m")
 
-        month_first_day = datetime.datetime.strptime(month, "%Y-%m")
-        month_num = str(month_first_day.month)  # 得到str月份
-        month_shortname = month_first_day.strftime("%b")  # e.g. Jul, Jun
-        month_fullname = month_first_day.strftime("%B")  # e.g. July, June
-
-        # Input Files
-        revise_station_name = 'Input/revise_station.xlsx'
-        inb_pics_file_path_new = 'Input/IB_production_new/IB_production_{}_new.xlsx'.format(day)  # IB_production增加印標、收發、貼標後會儲存在此，並做為之後計算的input
-
-        # Crate folder
-        output_foler(month_fullname)
-        tmp_output_folder()
-
-        tl_output_path = "Output/{}/productivity_TL/productivity_TL_{}.xlsx".format(month_fullname, day)
-        agent_output_path = "Output/{}/productivity_agent/productivity_agent_{}.xlsx".format(month_fullname, day)
-        tl_valid_output_path = "Output/{}/productivity_TL_valid/productivity_TL_{}_valid.xlsx".format(month_fullname, day)
-        agent_valid_output_path = "Output/{}/productivity_agent_valid/productivity_agent_{}_valid.xlsx".format(month_fullname, day)
-
-        print("="*5 + "Caculate {} Incentive".format(day) + "="*5)
-        main(day)
-        print("="*20+"\n")
-        
-        time.sleep(60*60*24)
 
 
 # In[ ]:
