@@ -165,11 +165,11 @@ Score_gdoc.SCOPES = "https://docs.google.com/spreadsheets/d/15BGIJYsV7onztRgBoji
 Score_gdoc.SAMPLE_RANGE_NAME = "Daily Update"
 
 
-# In[6]:
+# In[5]:
 
 
 # Checkpoint 1: 匯入打卡資料並進行前處理
-def read_punch_file(day, revise_station_name, type_dic):
+def read_punch_file(day, revise_station_name, gs):
     '''
     讀入站點打卡_for-attendance資料，進行整理
     ----------------
@@ -206,11 +206,11 @@ def read_punch_file(day, revise_station_name, type_dic):
     return punch_raw_df
 
 
-# In[7]:
+# In[6]:
 
 
 # Checkpoint 2: 匯入人力資料並進行前處理
-def read_human_data():
+def read_human_data(gs):
     '''
     抓取「人力資料_schema」資料，並轉成後續需要的字典
     1. name_id_dic: 姓名(key)與員編(value)
@@ -233,11 +233,11 @@ def read_human_data():
     return name_id_dic, id_name_dic, pda_name_dic, pda_id_dic
 
 
-# In[8]:
+# In[7]:
 
 
 # Checkpoint 3: 將IB_production新增貼標、收發、印標資料
-def add_data_in_inb(time2):
+def add_data_in_inb(time2, gs, day, month_fullname, inb_pics_file_path_new):
     '''
     1. 新增貼標到 inb_pics_file_path (IB_production) (2021/05)
     2. 新增收發到 inb_pics_file_path (IB_production) (2021/05)
@@ -254,7 +254,7 @@ def add_data_in_inb(time2):
     print('Checkpoint 3-1 人力資料_schema SUCCEED    Spend {:.2f} seconds'.format(time3_1 - time2))
 
     # 3-2 抓取貼標資料，在get_gdoc.get_tag_data中匯出excel，並存為tag_summary
-    tag_df = get_everyday_tag_data(day)
+    tag_df = get_everyday_tag_data(day, gs)
     tag_df = tag_df[["版標流水號", "貼標開始", "貼標人數(人)", "貼標ID"]]
 
     wms_gsheet = gs.open_by_url(WMS_gdoc.SCOPES).worksheet(WMS_gdoc.SAMPLE_RANGE_NAME)
@@ -312,7 +312,7 @@ def add_data_in_inb(time2):
     print('Checkpoint 3-3 docked_summary SUCCEED     Spend {:.2f} seconds'.format(time3_3 - time3_2))
 
     # 檔案4. print_summary: 如果有檔案，直接讀取過去檔案；反之則執行processing.take_month_data取得資料
-    print_df = get_everyday_print_data(day)
+    print_df = get_everyday_print_data(day, gs)
     print_df = print_df[["印標人員", "DATE"]]
     print_df['印標人員'] = print_df['印標人員'].apply(lambda x : str(x).replace("x", "0").replace("X", "0"))
     print_df['印標人員'] = print_df['印標人員'].astype('float').astype("int").astype("str")
@@ -345,7 +345,7 @@ def add_data_in_inb(time2):
     
 
 
-# In[9]:
+# In[8]:
 
 
 # Checkpoint 4: 輸入資料格式統一
@@ -368,11 +368,11 @@ def read_ibs(inb_pics_file_path_new, id_name_dic):
     return inb_pic_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders']]
 
 
-# In[10]:
+# In[9]:
 
 
 # Checkpoint 4-2: OB_production
-def read_obs(id_name_dic, pda_id_dic):
+def read_obs(id_name_dic, pda_id_dic, gs, day):
     '''
     read oubound / inv PICS 的資料 (excel)
     input:
@@ -407,11 +407,11 @@ def read_obs(id_name_dic, pda_id_dic):
     return ob_pic_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders']]
 
 
-# In[11]:
+# In[10]:
 
 
 # Checkpoint 4-3: INV_production
-def read_inv(id_name_dic):
+def read_inv(id_name_dic, gs, day):
     '''
     read oubound / inv PICS 的資料 (excel)
     input:
@@ -440,7 +440,7 @@ def read_inv(id_name_dic):
     return inv_pic_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders']]
 
 
-# In[12]:
+# In[11]:
 
 
 # Checkpoint 4-4: 將IB_production、OB_production、INV_production資料合併，得到whole_df
@@ -464,7 +464,7 @@ def get_whole_df(ib_df, inv_df, ob_df):
     return whole_df
 
 
-# In[13]:
+# In[12]:
 
 
 # Checkpoint 5-1: 將whole_df、punch_df合併，得到merge_df
@@ -503,11 +503,11 @@ def get_merge_df(whole_df, punch_df):
     return merge_df
 
 
-# In[14]:
+# In[13]:
 
 
 # Checkpoint 5-2: 將merge_df依各種工作種類合併(位於calculate_score.py)
-def get_valid_csv(merge_df, cat_name_checked):
+def get_valid_csv(merge_df, cat_name_checked, day):
     '''
     將5-1 merge_df的結果依不同cat_type分別儲存成csv檔
     input:
@@ -523,7 +523,7 @@ def get_valid_csv(merge_df, cat_name_checked):
         cat_df.to_csv('Output/incentive_checked/{}/{}.csv'.format(day, cat), encoding="utf_8_sig")
 
 
-# In[15]:
+# In[14]:
 
 
 # Checkpoint 6: 計算productivity_agent
@@ -597,7 +597,7 @@ def get_prod_agent_score(cat_name, productivity_varable, whole_df, punch_df, age
     return productivity_table
 
 
-# In[16]:
+# In[15]:
 
 
 # Checkpoint 7: 計算productivity_TL
@@ -655,11 +655,11 @@ def get_prod_TL_score(productivity_varable, team_prod_dict, whole_df, punch_df, 
         productivity_team_function.to_excel(writer, sheet_name='productivity_team_function', index=False, encoding="utf_8_sig")
 
 
-# In[17]:
+# In[16]:
 
 
 # Checkpoint 8: 將merge_df進行validation，產出 valid_whole_df
-def get_valid_whole_df(merge_df):
+def get_valid_whole_df(merge_df, day):
     '''
     將5-1的 merge_df 按照以下規則進行篩選：
     1. 打卡時間位於 punch starting time and punch ending time
@@ -682,10 +682,10 @@ def get_valid_whole_df(merge_df):
     return valid_whole_df
 
 
-# In[18]:
+# In[17]:
 
 
-def submit_score_to_gsheet(df):
+def submit_score_to_gsheet(df, gs, day):
     new_score_df = df[["ID", "name", "Productivity Score"]]
     score_gsheet = gs.open_by_url(Score_gdoc.SCOPES).worksheet(Score_gdoc.SAMPLE_RANGE_NAME)
     score_df = pd.DataFrame(score_gsheet.get_all_records())
@@ -706,10 +706,10 @@ def movefileAndPush():
         print("Error occured :".format(e))
 
 
-# In[19]:
+# In[18]:
 
 
-def get_everyday_tag_data(day):
+def get_everyday_tag_data(day, gs):
     SAMPLE_RANGE_NAME = day.replace("-", "")  # 抓幾月幾號的表，例如2021-06-01就抓20210601
     columns = ['版標流水號', '貼標開始', '貼標結束', '是否結束', '花費時間', '貼標人數(人)', '貼標ID']
     try:
@@ -728,10 +728,16 @@ def get_everyday_tag_data(day):
     return tag_df
 
 
-# In[20]:
+# In[ ]:
 
 
-def get_everyday_print_data(day):
+
+
+
+# In[19]:
+
+
+def get_everyday_print_data(day, gs):
     day_obj = datetime.datetime.strptime(day, '%Y-%m-%d')
     SAMPLE_RANGE_NAME = "{}/{}".format(day_obj.month, day_obj.day) # 抓幾月幾號的表
     cols = ['是否印標', '印標人員', 'Tracking ID', '尾碼', 'SKU ID', 'DATE']
@@ -759,96 +765,7 @@ def get_everyday_print_data(day):
     return print_df
 
 
-# In[21]:
-
-
-def main(day):
-    
-    # 獲得憑證
-    scope = ['https://www.googleapis.com/auth/spreadsheets']
-    creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
-    gs = gspread.authorize(creds)
-
-    print("="*5 + "Caculate {} Incentive".format(day) + "="*5)
-    time0 = time.time()
-    punch_df = read_punch_file(day, revise_station_name, type_dic)
-    punch_df.to_csv('tmp_output/punch_df/punch_df_{}.csv'.format(day), index=False, encoding="utf_8_sig")
-    punch_df.dropna(subset=['created_time', 'end_time'], axis=0, inplace=True)
-
-    time1 = time.time()
-    print('Checkpoint 1 read_punch_file SUCCEED      Spend {:.2f} seconds'.format(time1 - time0))
-
-    name_id_dic, id_name_dic, pda_name_dic, pda_id_dic = read_human_data()
-    time2 = time.time()
-    print('Checkpoint 2 read_human_datas SUCCEED     Spend {:.2f} seconds'.format(time2 - time1))
-    
-    add_data_in_inb(time2)
-    time3 = time.time()
-    print('Checkpoint 3 add_data_in_inb SUCCEED      Spend {:.2f} seconds'.format(time3 - time2))
-
-    ib_df = read_ibs(inb_pics_file_path_new, id_name_dic)
-    time4_1 = time.time()
-    print('Checkpoint 4-1 ib_df SUCCEED              Spend {:.2f} seconds'.format(time4_1 - time3))
-
-    ob_df = read_obs(id_name_dic, pda_id_dic)
-    time4_2 = time.time()
-    print('Checkpoint 4-2 ob_df SUCCEED              Spend {:.2f} seconds'.format(time4_2 - time4_1)) 
-
-    inv_df = read_inv(id_name_dic)
-    time4_3 = time.time()
-    print('Checkpoint 4-3 inv_df SUCCEED             Spend {:.2f} seconds'.format(time4_3 - time4_2))
-
-    whole_df = get_whole_df(ib_df, inv_df, ob_df)
-    whole_df.to_csv('tmp_output/whole_df/whole_df_{}.csv'.format(day), index=False, encoding="utf_8_sig")
-    time4_4 = time.time()
-    print('Checkpoint 4-4 whole_df SUCCEED           Spend {:.2f} seconds'.format(time4_4 - time4_3))
-
-    time4 = time.time()
-    print('Checkpoint 4 whole_df SUCCEED             Spend {:.2f} seconds'.format(time4 - time3))
-
-    merge_df = get_merge_df(whole_df, punch_df)
-    merge_df.to_csv("tmp_output/merge_df/merge_df_{}.csv".format(day), index=False, encoding="utf_8_sig")
-    time5_1 = time.time()
-    print('Checkpoint 5-1 get_merge_df SUCCEED       Spend {:.2f} seconds'.format(time5_1 - time4))
-
-    get_valid_csv(merge_df, cat_name_checked)
-    time5_2 = time.time()
-    print('Checkpoint 5-2 get_valid_csv SUCCEED      Spend {:.2f} seconds'.format(time5_2 - time5_1))
-    time5 = time.time()
-    print('Checkpoint 5 SUCCEED   Spend {:.2f} seconds'.format(time5 - time4))
-
-
-    get_prod_agent_score(cat_name, productivity_varable, whole_df, punch_df, agent_output_path)
-    time6 = time.time()
-    print('Checkpoint 6 productivity_agent SUCCEED   Spend {:.2f} seconds'.format(time6 - time5))
-
-    get_prod_TL_score(productivity_varable, team_prod_dict, whole_df, punch_df, tl_output_path)
-    time7 = time.time()
-    print('Checkpoint 7 productivity_TL SUCCEED      Spend {:.2f} seconds'.format(time7 - time6))
-
-    valid_whole_df = get_valid_whole_df(merge_df)
-
-    valid_whole_df.dropna(axis=0, inplace=True)
-    time8 = time.time()
-    print('Checkpoint 8 get_valid_whole_df SUCCEED      Spend {:.2f} seconds'.format(time8 - time7))
-
-    scroe_df = get_prod_agent_score(cat_name, productivity_varable, valid_whole_df, punch_df, agent_valid_output_path)
-    time9 = time.time()
-    print('Checkpoint 9 productivity_valid_agent SUCCEED     Spend {:.2f} seconds'.format(time9 - time8))
-
-    get_prod_TL_score(productivity_varable, team_prod_dict, valid_whole_df, punch_df, tl_valid_output_path)
-    time10 = time.time()
-    print('Checkpoint 10 productivity_valid_TL SUCCEED        Spend {:.2f} seconds'.format(time10 - time9))
-    
-    submit_score_to_gsheet(scroe_df)
-    movefileAndPush()
-    time11 = time.time()
-    print('Checkpoint 11 Update final score to gsheet        Spend {:.2f} seconds'.format(time11 - time10))
-    print('計算完成 共花費{:.2f}秒'.format(time11 - time0))
-    print("="*20+"\n")
-
-
-# In[22]:
+# In[20]:
 
 
 def output_foler(month_fullname):
@@ -888,40 +805,130 @@ def tmp_output_folder():
         os.makedirs("tmp_output/whole_df/")
 
 
-# In[29]:
+# In[21]:
 
 
-yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
-day = yesterday.strftime("%Y-%m-%d")
-month = yesterday.strftime("%Y-%m")
+def main():
+    yesterday = datetime.datetime.now() - datetime.timedelta(days=0)
+    day = yesterday.strftime("%Y-%m-%d")
+    month = yesterday.strftime("%Y-%m")
 
-month_first_day = datetime.datetime.strptime(month, "%Y-%m")
-month_num = str(month_first_day.month)  # 得到str月份
-month_shortname = month_first_day.strftime("%b")  # e.g. Jul, Jun
-month_fullname = month_first_day.strftime("%B")  # e.g. July, June
+    month_first_day = datetime.datetime.strptime(month, "%Y-%m")
+    month_num = str(month_first_day.month)  # 得到str月份
+    month_shortname = month_first_day.strftime("%b")  # e.g. Jul, Jun
+    month_fullname = month_first_day.strftime("%B")  # e.g. July, June
 
-# Input Files
-revise_station_name = 'Input/revise_station.xlsx'
-inb_pics_file_path_new = 'Input/IB_production_new/IB_production_{}_new.xlsx'.format(day)  # IB_production增加印標、收發、貼標後會儲存在此，並做為之後計算的input
+    # Input Files
+    revise_station_name = 'Input/revise_station.xlsx'
+    inb_pics_file_path_new = 'Input/IB_production_new/IB_production_{}_new.xlsx'.format(day)  # IB_production增加印標、收發、貼標後會儲存在此，並做為之後計算的input
 
-# Crate folder
-output_foler(month_fullname)
-tmp_output_folder()
+    # Crate folder
+    output_foler(month_fullname)
+    tmp_output_folder()
 
-tl_output_path = "Output/{}/productivity_TL/productivity_TL_{}.xlsx".format(month_fullname, day)
-agent_output_path = "Output/{}/productivity_agent/productivity_agent_{}.xlsx".format(month_fullname, day)
-tl_valid_output_path = "Output/{}/productivity_TL_valid/productivity_TL_{}_valid.xlsx".format(month_fullname, day)
-agent_valid_output_path = "Output/{}/productivity_agent_valid/productivity_agent_{}_valid.xlsx".format(month_fullname, day)
+    tl_output_path = "Output/{}/productivity_TL/productivity_TL_{}.xlsx".format(month_fullname, day)
+    agent_output_path = "Output/{}/productivity_agent/productivity_agent_{}.xlsx".format(month_fullname, day)
+    tl_valid_output_path = "Output/{}/productivity_TL_valid/productivity_TL_{}_valid.xlsx".format(month_fullname, day)
+    agent_valid_output_path = "Output/{}/productivity_agent_valid/productivity_agent_{}_valid.xlsx".format(month_fullname, day)
+    
+    # 獲得憑證
+    scope = ['https://www.googleapis.com/auth/spreadsheets']
+    creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
+    gs = gspread.authorize(creds)
+
+    print("="*5 + "Caculate {} Incentive".format(day) + "="*5)
+    time0 = time.time()
+    punch_df = read_punch_file(day, revise_station_name, gs)
+    punch_df.to_csv('tmp_output/punch_df/punch_df_{}.csv'.format(day), index=False, encoding="utf_8_sig")
+    punch_df.dropna(subset=['created_time', 'end_time'], axis=0, inplace=True)
+
+    time1 = time.time()
+    print('Checkpoint 1 read_punch_file SUCCEED      Spend {:.2f} seconds'.format(time1 - time0))
+
+    name_id_dic, id_name_dic, pda_name_dic, pda_id_dic = read_human_data(gs)
+    time2 = time.time()
+    print('Checkpoint 2 read_human_datas SUCCEED     Spend {:.2f} seconds'.format(time2 - time1))
+    
+    add_data_in_inb(time2, gs, day, month_fullname, inb_pics_file_path_new)
+    time3 = time.time()
+    print('Checkpoint 3 add_data_in_inb SUCCEED      Spend {:.2f} seconds'.format(time3 - time2))
+
+    ib_df = read_ibs(inb_pics_file_path_new, id_name_dic)
+    time4_1 = time.time()
+    print('Checkpoint 4-1 ib_df SUCCEED              Spend {:.2f} seconds'.format(time4_1 - time3))
+
+    ob_df = read_obs(id_name_dic, pda_id_dic, gs, day)
+    time4_2 = time.time()
+    print('Checkpoint 4-2 ob_df SUCCEED              Spend {:.2f} seconds'.format(time4_2 - time4_1)) 
+
+    inv_df = read_inv(id_name_dic, gs, day)
+    time4_3 = time.time()
+    print('Checkpoint 4-3 inv_df SUCCEED             Spend {:.2f} seconds'.format(time4_3 - time4_2))
+
+    whole_df = get_whole_df(ib_df, inv_df, ob_df)
+    whole_df.to_csv('tmp_output/whole_df/whole_df_{}.csv'.format(day), index=False, encoding="utf_8_sig")
+    time4_4 = time.time()
+    print('Checkpoint 4-4 whole_df SUCCEED           Spend {:.2f} seconds'.format(time4_4 - time4_3))
+
+    time4 = time.time()
+    print('Checkpoint 4 whole_df SUCCEED             Spend {:.2f} seconds'.format(time4 - time3))
+
+    merge_df = get_merge_df(whole_df, punch_df)
+    merge_df.to_csv("tmp_output/merge_df/merge_df_{}.csv".format(day), index=False, encoding="utf_8_sig")
+    time5_1 = time.time()
+    print('Checkpoint 5-1 get_merge_df SUCCEED       Spend {:.2f} seconds'.format(time5_1 - time4))
+
+    get_valid_csv(merge_df, cat_name_checked, day)
+    time5_2 = time.time()
+    print('Checkpoint 5-2 get_valid_csv SUCCEED      Spend {:.2f} seconds'.format(time5_2 - time5_1))
+    time5 = time.time()
+    print('Checkpoint 5 SUCCEED   Spend {:.2f} seconds'.format(time5 - time4))
 
 
-# In[31]:
+    get_prod_agent_score(cat_name, productivity_varable, whole_df, punch_df, agent_output_path)
+    time6 = time.time()
+    print('Checkpoint 6 productivity_agent SUCCEED   Spend {:.2f} seconds'.format(time6 - time5))
+
+    get_prod_TL_score(productivity_varable, team_prod_dict, whole_df, punch_df, tl_output_path)
+    time7 = time.time()
+    print('Checkpoint 7 productivity_TL SUCCEED      Spend {:.2f} seconds'.format(time7 - time6))
+
+    valid_whole_df = get_valid_whole_df(merge_df, day)
+
+    valid_whole_df.dropna(axis=0, inplace=True)
+    time8 = time.time()
+    print('Checkpoint 8 get_valid_whole_df SUCCEED      Spend {:.2f} seconds'.format(time8 - time7))
+
+    scroe_df = get_prod_agent_score(cat_name, productivity_varable, valid_whole_df, punch_df, agent_valid_output_path)
+    time9 = time.time()
+    print('Checkpoint 9 productivity_valid_agent SUCCEED     Spend {:.2f} seconds'.format(time9 - time8))
+
+    get_prod_TL_score(productivity_varable, team_prod_dict, valid_whole_df, punch_df, tl_valid_output_path)
+    time10 = time.time()
+    print('Checkpoint 10 productivity_valid_TL SUCCEED        Spend {:.2f} seconds'.format(time10 - time9))
+    
+    submit_score_to_gsheet(scroe_df, gs, day)
+    movefileAndPush()
+    time11 = time.time()
+    print('Checkpoint 11 Update final score to gsheet        Spend {:.2f} seconds'.format(time11 - time10))
+    print('計算完成 共花費{:.2f}秒'.format(time11 - time0))
+    print("="*20+"\n")
+
+
+# In[22]:
 
 
 if __name__ == "__main__":
-    schedule.every().day.at("22:15").do(main, day)
+    schedule.every().day.at("22:30").do(main, day)
     while True:
         schedule.run_pending()
         time.sleep(60) # wait one minute
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
