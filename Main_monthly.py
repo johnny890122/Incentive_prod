@@ -234,6 +234,7 @@ def add_data_in_inb(time2):
         df = get_everyday_tag_data(day.strftime("%Y-%m-%d"), tag_gsheet)
         tag_df = pd.concat([tag_df, df])
         time.sleep(3)
+    tag_df.to_csv("tmp_output/label_raw_{}.csv".format(month_shortname), encoding="utf_8_sig")
     
     tag_df = tag_df[["版標流水號", "貼標開始", "貼標人數(人)", "貼標ID"]]
     
@@ -299,7 +300,8 @@ def add_data_in_inb(time2):
         df = get_everyday_print_data(day.strftime("%Y-%m-%d"), print_gsheet)
         print_df = pd.concat([print_df, df])
         time.sleep(3)
-
+    print_df.to_csv("tmp_output/print_raw_{}.csv".format(month_shortname), encoding="utf_8_sig")
+    
     print_df = print_df[["印標人員", "DATE"]]
     print_df['印標人員'] = print_df['印標人員'].apply(lambda x : str(x).replace("x", "0").replace("X", "0"))
     print_df['印標人員'] = print_df['印標人員'].astype("str")
@@ -311,6 +313,7 @@ def add_data_in_inb(time2):
     print_summary['orders'] = 1  # 每個orders = 1
     print_summary = print_summary[['員編', 'type', 'total_pcs', 'box', 'orders', 'DATE']]
     print_summary.columns = ['operator', 'type', 'total_pcs', 'box', 'orders', 'inbound_date']  # 合併資料統一要這幾個欄位
+    
     print(print_summary.head())
     time3_4 = time.time()
     print('Checkpoint 3-4 print_df SUCCEED           Spend {:.2f} seconds'.format(time3_4 - time3_3))
