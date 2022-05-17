@@ -1,0 +1,7 @@
+﻿,name,operator,type,create_time,pcs,box,orders,total_pcs,Check Result,created_time,end_time,print_label
+2660,潘怡安,sp99055,Cyclecount,2022-05-13 08:19:30,0,0,0,0,No data,,,
+3224,賴韻如,sp99080,Cyclecount,2022-05-13 08:33:24,1953,0,0,1953,Wrong Station,2022-05-13 08:03:25,2022-05-13 08:35:34,ABNORMAL
+9228,賴韻如,sp99080,Cyclecount,2022-05-13 11:15:29,282,0,0,282,Correct,2022-05-13 08:35:38,2022-05-13 11:48:35,
+11525,賴韻如,sp99080,Cyclecount,2022-05-13 13:17:31,3083,0,0,3083,Wrong Station,2022-05-13 12:56:25,2022-05-13 13:18:57,ABNORMAL
+16120,賴韻如,sp99080,Cyclecount,2022-05-13 16:32:27,182,0,0,182,Correct,2022-05-13 15:21:30,2022-05-13 16:59:16,
+16713,賴韻如,sp99080,Cyclecount,2022-05-13 16:51:16,85,0,0,85,Correct,2022-05-13 15:21:30,2022-05-13 16:59:16,
