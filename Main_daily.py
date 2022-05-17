@@ -119,7 +119,7 @@ class gdoc_information():
         self.SAMPLE_RANGE_NAME = ""
 
 
-# In[5]:
+# In[4]:
 
 
 ppl_schema = gdoc_information()
@@ -165,7 +165,7 @@ Score_gdoc.SCOPES = "https://docs.google.com/spreadsheets/d/15BGIJYsV7onztRgBoji
 Score_gdoc.SAMPLE_RANGE_NAME = "Daily Update"
 
 
-# In[6]:
+# In[5]:
 
 
 # Checkpoint 1: 匯入打卡資料並進行前處理
@@ -206,7 +206,7 @@ def read_punch_file(day, revise_station_name, gs):
     return punch_raw_df
 
 
-# In[7]:
+# In[6]:
 
 
 # Checkpoint 2: 匯入人力資料並進行前處理
@@ -233,7 +233,7 @@ def read_human_data(gs):
     return name_id_dic, id_name_dic, pda_name_dic, pda_id_dic
 
 
-# In[8]:
+# In[7]:
 
 
 # Checkpoint 3: 將IB_production新增貼標、收發、印標資料
@@ -345,7 +345,7 @@ def add_data_in_inb(time2, gs, day, month_fullname, inb_pics_file_path_new):
     
 
 
-# In[9]:
+# In[8]:
 
 
 # Checkpoint 4: 輸入資料格式統一
@@ -368,7 +368,7 @@ def read_ibs(inb_pics_file_path_new, id_name_dic):
     return inb_pic_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders']]
 
 
-# In[10]:
+# In[54]:
 
 
 # Checkpoint 4-2: OB_production
@@ -386,8 +386,8 @@ def read_obs(id_name_dic, pda_id_dic, gs, day):
     ob_gsheet = gs.open_by_url(OB_gdoc.SCOPES).worksheet(OB_gdoc.SAMPLE_RANGE_NAME)
     ob_pic_df = pd.DataFrame(ob_gsheet.get_all_records()).append(pd.DataFrame(awb_gsheet.get_all_records()))
     ob_pic_df['create_time'] = pd.to_datetime(ob_pic_df['create_time'], errors='coerce')
-
-    ob_pic_df["DATE"] = ob_pic_df["create_time"].apply(lambda x: x.strftime('%Y-%m-%d'))
+#     print(ob_pic_df['create_time'].unique())
+    ob_pic_df["DATE"] = ob_pic_df["create_time"].dt.strftime('%Y-%m-%d')
     ob_pic_df = ob_pic_df[ob_pic_df["DATE"] == day]
     ob_pic_df.drop(columns='DATE')
     
@@ -407,7 +407,7 @@ def read_obs(id_name_dic, pda_id_dic, gs, day):
     return ob_pic_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders']]
 
 
-# In[11]:
+# In[55]:
 
 
 # Checkpoint 4-3: INV_production
@@ -440,7 +440,7 @@ def read_inv(id_name_dic, gs, day):
     return inv_pic_df[['name', 'operator', 'type', 'create_time', 'pcs', 'box', 'orders']]
 
 
-# In[12]:
+# In[56]:
 
 
 # Checkpoint 4-4: 將IB_production、OB_production、INV_production資料合併，得到whole_df
@@ -464,7 +464,7 @@ def get_whole_df(ib_df, inv_df, ob_df):
     return whole_df
 
 
-# In[13]:
+# In[57]:
 
 
 # Checkpoint 5-1: 將whole_df、punch_df合併，得到merge_df
@@ -503,7 +503,7 @@ def get_merge_df(whole_df, punch_df):
     return merge_df
 
 
-# In[14]:
+# In[58]:
 
 
 # Checkpoint 5-2: 將merge_df依各種工作種類合併(位於calculate_score.py)
@@ -523,7 +523,7 @@ def get_valid_csv(merge_df, cat_name_checked, day):
         cat_df.to_csv('Output/incentive_checked/{}/{}.csv'.format(day, cat), encoding="utf_8_sig")
 
 
-# In[15]:
+# In[59]:
 
 
 # Checkpoint 6: 計算productivity_agent
@@ -597,7 +597,7 @@ def get_prod_agent_score(cat_name, productivity_varable, whole_df, punch_df, age
     return productivity_table
 
 
-# In[16]:
+# In[60]:
 
 
 # Checkpoint 7: 計算productivity_TL
@@ -655,7 +655,7 @@ def get_prod_TL_score(productivity_varable, team_prod_dict, whole_df, punch_df, 
         productivity_team_function.to_excel(writer, sheet_name='productivity_team_function', index=False, encoding="utf_8_sig")
 
 
-# In[17]:
+# In[61]:
 
 
 # Checkpoint 8: 將merge_df進行validation，產出 valid_whole_df
@@ -682,7 +682,7 @@ def get_valid_whole_df(merge_df, day):
     return valid_whole_df
 
 
-# In[18]:
+# In[62]:
 
 
 def submit_score_to_gsheet(df, gs, day):
@@ -706,7 +706,7 @@ def movefileAndPush():
         print("Error occured :".format(e))
 
 
-# In[19]:
+# In[63]:
 
 
 def get_everyday_tag_data(day, gs):
@@ -734,7 +734,7 @@ def get_everyday_tag_data(day, gs):
 
 
 
-# In[20]:
+# In[64]:
 
 
 def get_everyday_print_data(day, gs):
@@ -765,7 +765,7 @@ def get_everyday_print_data(day, gs):
     return print_df
 
 
-# In[21]:
+# In[65]:
 
 
 def output_foler(month_fullname):
@@ -805,7 +805,7 @@ def tmp_output_folder():
         os.makedirs("tmp_output/whole_df/")
 
 
-# In[25]:
+# In[72]:
 
 
 def main():
@@ -917,7 +917,7 @@ def main():
     print("="*20+"\n")
 
 
-# In[23]:
+# In[73]:
 
 
 if __name__ == "__main__":
@@ -926,6 +926,12 @@ if __name__ == "__main__":
     while True:
         schedule.run_pending()
         time.sleep(30) # wait one minute
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
