@@ -1,0 +1,7 @@
+﻿,name,operator,type,create_time,pcs,box,orders,total_pcs,Check Result,created_time,end_time,print_label
+806,賴韻如,sp99080,Cyclecount,2022-06-09 08:00:47,506,0,0,506,No data,,,
+807,莊佩玲,sp99045,Cyclecount,2022-06-09 08:00:47,108,0,0,108,No data,,,
+1198,鍾怡萍,sp99053,Cyclecount,2022-06-09 08:15:17,18,0,0,18,No data,,,
+2343,賴韻如,sp99080,Cyclecount,2022-06-09 09:01:30,14,0,0,14,Correct,2022-06-09 08:43:00,2022-06-09 10:25:35,
+2533,莊佩玲,sp99045,Cyclecount,2022-06-09 09:07:29,10,0,0,10,Wrong Station,2022-06-09 08:26:56,2022-06-09 09:22:23,IB indirect
+2535,賴韻如,sp99080,Cyclecount,2022-06-09 09:07:29,876,0,0,876,Correct,2022-06-09 08:43:00,2022-06-09 10:25:35,
